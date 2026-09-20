@@ -1,0 +1,8 @@
+.DS_Store
+DerivedData/
+build/
+Scripts/.poetry-cache/
+*.xcuserstate
+xcuserdata/
+dist/
+SHIYUN_reference.rtf

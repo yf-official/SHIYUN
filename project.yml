@@ -1,0 +1,49 @@
+name: SHIYUN
+options:
+  bundleIdPrefix: com.shiyun
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  SHIYUN:
+    type: application
+    platform: macOS
+    sources:
+      - path: SHIYUN
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.shiyun.app
+        PRODUCT_NAME: SHIYUN
+        INFOPLIST_FILE: SHIYUN/Support/Info.plist
+        CODE_SIGN_ENTITLEMENTS: SHIYUN/Support/SHIYUN.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - sdk: libsqlite3.tbd
+  SHIYUNTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: SHIYUNTests
+    dependencies:
+      - target: SHIYUN
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.shiyun.tests
+schemes:
+  SHIYUN:
+    build:
+      targets:
+        SHIYUN: all
+        SHIYUNTests: [test]
+    test:
+      targets:
+        - SHIYUNTests
