@@ -30,6 +30,7 @@ final class PoetryScheduler: ObservableObject {
     }
 
     func stop() {
+        guard isRunning || playbackTask != nil else { return }
         isRunning = false
         transitionRevision += 1
         playbackTask?.cancel()

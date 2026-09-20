@@ -12,6 +12,20 @@ SHIYUN 是一款 macOS 原生的动态古诗词应用：让诗句安静地出现
 
 从 [Releases](https://github.com/yf-official/SHIYUN/releases/latest) 下载通用 macOS 应用（Apple Silicon 与 Intel）。最低支持 macOS 14。应用内置完整离线诗库，首次启动不需要网络。
 
+## 使用预览
+
+诗境窗口将诗句、署名与控制层保持在视觉中心，背景与排版可以按个人偏好调整。
+
+<p align="center">
+  <img src="docs/images/ambient.png" width="760" alt="SHIYUN 诗境窗口">
+</p>
+
+诗词总库提供全文搜索、朝代与作者筛选，以及一键收藏。
+
+<p align="center">
+  <img src="docs/images/library.png" width="760" alt="SHIYUN 诗词总库">
+</p>
+
 ## 当前版本
 
 - 原生 SwiftUI，最低支持 macOS 14
@@ -32,6 +46,7 @@ SHIYUN 是一款 macOS 原生的动态古诗词应用：让诗句安静地出现
 - 9 种系统中文字体（宋、楷、苹方、黑体、仿宋、圆体、丽宋、魏碑、兰亭黑）、字号、自定义诗句颜色；署名信息同步继承正文的字体与颜色
 - 默认氛围、用户自选纯色或本地图片背景；图片自动压缩到最长边 3840 px
 - 运行时缓存硬上限为 8 MB，启动时清理最旧缓存；背景只保留当前一张且不超过 6 MB
+- 非活动窗口自动暂停播放与动画，外观配置只在值变化时重绘，减少后台 CPU/GPU 占用
 - 自定义诗句停留（8–120 秒）和留白（1–15 秒），保留轻微自然随机
 - 菜单栏入口与 Apple `SMAppService` 登录时启动
 - Reduce Motion、VoiceOver 与 Retina 适配

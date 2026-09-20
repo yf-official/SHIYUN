@@ -42,9 +42,13 @@ private struct WindowAppearanceBridge: NSViewRepresentable {
         case .light: appearance = NSAppearance(named: .aqua)
         case .dark: appearance = NSAppearance(named: .darkAqua)
         }
-        DispatchQueue.main.async {
-            nsView.window?.appearance = appearance
-        }
+
+        // Updating a window's appearance invalidates the SwiftUI view tree. Do
+        // not assign the same value on every update, otherwise SwiftUI and
+        // AppKit continuously invalidate each other and keep the CPU awake.
+        guard let window = nsView.window else { return }
+        guard window.appearance?.name != appearance?.name else { return }
+        window.appearance = appearance
     }
 }
 

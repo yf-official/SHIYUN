@@ -33,7 +33,9 @@ struct AmbientBackground: View {
         }
         .clipped()
         .ignoresSafeArea()
-        .animation(.easeInOut(duration: 18), value: focalPoint)
+        // Keep the paper-light shift brief. A long-running gradient animation
+        // keeps the compositor rendering even while the poem is unchanged.
+        .animation(.easeInOut(duration: 1.1), value: focalPoint)
     }
 
     private var atmosphere: some View {

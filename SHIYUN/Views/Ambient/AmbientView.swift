@@ -57,6 +57,13 @@ struct AmbientView: View {
             .onContinuousHover { phase in
                 if case .active = phase { recordPointerActivity() }
             }
+            .background(WindowActivityMonitor { isKeyWindow in
+                if isKeyWindow {
+                    scheduler.start()
+                } else {
+                    scheduler.stop()
+                }
+            })
         }
         .focusable()
         .focusEffectDisabled()
@@ -87,13 +94,17 @@ struct AmbientView: View {
     private func startControlVisibilityMonitor() {
         hideControlsTask?.cancel()
         controlActivity.lastInputTime = ProcessInfo.processInfo.systemUptime
-        hideControlsTask = Task {
+        hideControlsTask = Task { @MainActor in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(400))
+                let elapsed = ProcessInfo.processInfo.systemUptime - controlActivity.lastInputTime
+                let remaining = max(0.1, 3.2 - elapsed)
+                try? await Task.sleep(for: .seconds(remaining))
                 guard !Task.isCancelled else { return }
                 let idleTime = ProcessInfo.processInfo.systemUptime - controlActivity.lastInputTime
                 if idleTime >= 3.2, !controlActivity.pointerOverControls, controlsVisible {
                     controlsVisible = false
+                    hideControlsTask = nil
+                    return
                 }
             }
         }
@@ -102,5 +113,74 @@ struct AmbientView: View {
     private func toggleFullscreen() {
         NSApp.keyWindow?.toggleFullScreen(nil)
         controlsVisible = false
+    }
+}
+
+/// Reports whether the ambient window is the active key window. Playback is
+/// paused while Settings, Favorites, or another app is in front so the hidden
+/// poem view does not keep scheduling transitions or rendering animations.
+private struct WindowActivityMonitor: NSViewRepresentable {
+    let onChange: (Bool) -> Void
+
+    func makeNSView(context: Context) -> ActivityView {
+        ActivityView(onChange: onChange)
+    }
+
+    func updateNSView(_ nsView: ActivityView, context: Context) {
+        nsView.onChange = onChange
+        nsView.reportIfNeeded()
+    }
+
+    final class ActivityView: NSView {
+        var onChange: (Bool) -> Void
+        private var observers: [NSObjectProtocol] = []
+        private var lastValue: Bool?
+
+        init(onChange: @escaping (Bool) -> Void) {
+            self.onChange = onChange
+            super.init(frame: .zero)
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            removeObservers()
+            lastValue = nil
+            guard let window else { return }
+
+            let center = NotificationCenter.default
+            observers = [
+                center.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] _ in
+                    self?.reportIfNeeded()
+                },
+                center.addObserver(forName: NSWindow.didResignKeyNotification, object: window, queue: .main) { [weak self] _ in
+                    self?.reportIfNeeded()
+                },
+                center.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
+                    self?.reportIfNeeded()
+                }
+            ]
+            reportIfNeeded()
+        }
+
+        func reportIfNeeded() {
+            let isKey = window?.isKeyWindow == true
+            guard lastValue != isKey else { return }
+            lastValue = isKey
+            onChange(isKey)
+        }
+
+        private func removeObservers() {
+            let center = NotificationCenter.default
+            observers.forEach(center.removeObserver)
+            observers.removeAll(keepingCapacity: false)
+        }
+
+        deinit {
+            removeObservers()
+        }
     }
 }

@@ -28,7 +28,13 @@ struct SHIYUNApp: App {
 
         MenuBarExtra("SHIYUN", systemImage: "text.quote", isInserted: Binding(
             get: { model.settings.showMenuBar },
-            set: { model.settings.showMenuBar = $0 }
+            set: { newValue in
+                // SwiftUI may re-apply the menu-bar configuration while it is
+                // rebuilding scenes. Avoid publishing an identical value,
+                // which otherwise creates a self-sustaining update loop.
+                guard model.settings.showMenuBar != newValue else { return }
+                model.settings.showMenuBar = newValue
+            }
         )) {
             MenuBarContent(model: model)
         }

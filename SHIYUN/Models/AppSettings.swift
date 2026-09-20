@@ -174,6 +174,7 @@ final class AppSettings: ObservableObject {
     }
 
     func selectAppearance(_ mode: AppearanceMode) {
+        guard appearance != mode else { return }
         appearance = mode
         applyApplicationAppearance(mode)
     }
@@ -189,10 +190,12 @@ final class AppSettings: ObservableObject {
             selectedAppearance = NSAppearance(named: .darkAqua)
         }
         DispatchQueue.main.async {
-            NSApp.appearance = selectedAppearance
+            if NSApp.appearance?.name != selectedAppearance?.name {
+                NSApp.appearance = selectedAppearance
+            }
             for window in NSApp.windows {
+                guard window.appearance?.name != selectedAppearance?.name else { continue }
                 window.appearance = selectedAppearance
-                window.contentView?.needsDisplay = true
             }
         }
     }
