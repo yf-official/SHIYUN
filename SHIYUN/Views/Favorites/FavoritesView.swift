@@ -56,6 +56,7 @@ struct FavoritesView: View {
             Divider().opacity(0.55)
             libraryContent
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationTitle(pageTitle)
         .environment(\.colorScheme, settings.resolvedColorScheme(system: systemColorScheme))
         .shiyunWindowAppearance(settings.appearance)
